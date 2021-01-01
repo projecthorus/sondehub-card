@@ -1,6 +1,10 @@
 # SondeHub Card
 A basic historical radiosonde flight-path display webpage, using data from the Sondehub Database.
 
+Currently this is hosted at: `https://sondehub.org/card/<sonde_id>`
+
+e.g. `https://sondehub.org/card/S1040275`
+
 ## Development & Testing
 * Uncomment the `path_fields = ['S1040075'];` line in index.html to override reading Sonde IDs from the URL
 * Run up local server: `python -m http.server`
