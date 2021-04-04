@@ -3,17 +3,19 @@
     <title>Radiosonde Flight Path</title>
     <!-- 
       Author: Mark Jessop
-      Date: 2021-01-01
+      Date: 2020-10-31
+    
     -->
    
     <!-- CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    
+    <link rel="stylesheet" href="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.css" />
     <!-- JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.js"></script>
     <script src="./js/Leaflet.Control.Custom.js"></script>
 
     <!-- Stylesheet to make map full-screen -->
@@ -38,13 +40,12 @@
 
     function init() {
 
-        // Grab the sonde ID from the URL.
+        // URL to historical data.
         var path_fields = window.location.pathname.split('/');
-        // Uncomment the below line if testing with a local webserver
-        //path_fields = ['S1040075']; // Testing only
+        //path_fields = ['S4610531']; // Testing only
         var sonde_id = path_fields[path_fields.length - 1];
-        // Create the URL to request data.
-        var sondehub_url = "https://habitat.sondehub.org/history/RS_" + sonde_id;
+        var sondehub_url = "https://api.v2.sondehub.org/sonde/" + sonde_id;
+
 
         // Rest of the code...
 
@@ -101,7 +102,7 @@
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // ESRI Satellite View
+        // Satellite View
         var esri_sat_map = L.tileLayer(
             'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 
             {
@@ -120,6 +121,8 @@
         // Now we can add the zoom control.
         new L.Control.Zoom({ position: 'topright' }).addTo(map);
         map.setView([0.0,0.0], 2);
+
+        L.control.polylineMeasure({position: 'topright', showClearControl: true}).addTo(map);
 
         // Now Attempt to grab the flight path data.
         $.ajax({
@@ -152,10 +155,10 @@
 
                 for (let i = 0; i < data.length; i++){
                   // Extract data.
-                  lat = parseFloat(data[i].location.lat);
-                  lon = parseFloat(data[i].location.lon);
+                  lat = parseFloat(data[i].lat);
+                  lon = parseFloat(data[i].lon);
                   alt = parseFloat(data[i].alt);
-                  timestamp = Date.parse(data[i].time_uploaded);
+                  timestamp = Date.parse(data[i].datetime);
                   sonde_path.addLatLng([lat, lon]);
 
                   // Initial observation time.
@@ -176,15 +179,15 @@
                   }
                 }
 
-                console.log(alt_data);
-                console.log(time_data);
+                //console.log(alt_data);
+                //console.log(time_data);
 
                 // Launch Marker
-                launch_lat = data[0].location.lat;
-                launch_lon = data[0].location.lon;
+                launch_lat = data[0].lat;
+                launch_lon = data[0].lon;
                 launch_alt = data[0].alt;
-                launch_observer = data[0].receivers;
-                launch_time = data[0].gps_time;
+                launch_observer = data[0].uploader_callsign;
+                launch_time = data[0].datetime;
 
                 launch_icon = L.icon({
                   iconUrl: "./images/launch_marker.png",
@@ -192,7 +195,7 @@
                   iconAnchor: [7.5,7.5]
                 });
 
-                launchIconTitle = 'First Observed Position (' + launch_lat + ', ' + launch_lon+ ', ' + launch_alt + ' m) at ' + launch_time + ', by ' + launch_observer;
+                launchIconTitle = 'First Observed Position (' + launch_lat + ', ' + launch_lon+ ', ' + Math.floor(launch_alt) + ' m) <br/>at ' + launch_time + ', by ' + launch_observer;
 
                 launchMarker = L.marker([launch_lat, launch_lon],
                     {
@@ -203,11 +206,11 @@
                     .addTo(map);
 
                 // Landing Marker
-                landing_lat = data[data.length-1].location.lat;
-                landing_lon = data[data.length-1].location.lon;
+                landing_lat = data[data.length-1].lat;
+                landing_lon = data[data.length-1].lon;
                 landing_alt = data[data.length-1].alt;
-                landing_observer = data[data.length-1].receivers;
-                landing_time = data[data.length-1].gps_time;
+                landing_observer = data[data.length-1].uploader_callsign;
+                landing_time = data[data.length-1].datetime;
 
                 landing_icon = L.icon({
                   iconUrl: "./images/landing_marker.png",
@@ -215,7 +218,7 @@
                   iconAnchor: [7.5,7.5]
                 });
 
-                landingIconTitle = 'Last Observed Position (' + landing_lat + ', ' + landing_lon+ ',' + landing_alt + ' m) at ' + landing_time + ', by ' + landing_observer;
+                landingIconTitle = 'Last Observed Position (' + landing_lat + ', ' + landing_lon+ ',' + Math.floor(landing_alt) + ' m) <br/>at ' + landing_time + ', by ' + landing_observer;
 
                 landingMarker = L.marker([landing_lat, landing_lon],
                     {
@@ -227,10 +230,10 @@
 
                 if (burst_idx > -1){
                   // Burst Marker
-                  burst_lat = data[burst_idx].location.lat;
-                  burst_lon = data[burst_idx].location.lon;
+                  burst_lat = data[burst_idx].lat;
+                  burst_lon = data[burst_idx].lon;
                   burst_alt = data[burst_idx].alt;
-                  burst_time = data[burst_idx].gps_time;
+                  burst_time = data[burst_idx].datetime;
 
                   burst_icon = L.icon({
                     iconUrl: "./images/burst_marker.png",
@@ -238,7 +241,7 @@
                     iconAnchor: [7.5,7.5]
                   });
 
-                  burstIconTitle = 'Burst at ' + burst_alt + ' metres altitude.';
+                  burstIconTitle = 'Burst at ' + Math.floor(burst_alt) + ' metres altitude.';
 
                   burstMarker = L.marker([burst_lat, burst_lon],
                       {
@@ -248,6 +251,7 @@
                       .bindTooltip(burstIconTitle,{permanent:false,direction:'right'})
                       .addTo(map);
                 }
+
 
                 sonde_path.addTo(map);
 
@@ -259,10 +263,9 @@
                 map.fitBounds(layerBounds);
 
                 // Grab sonde type from the telemetry
-                sonde_type = data[0].comment.split(" ")[0];
+                sonde_type = data[data.length-1].type;
 
 
-                // Altitude Profile
                 var plot_data = [
                   {
                     x: time_data,
@@ -274,7 +277,8 @@
                 var layout = {
                   //title: 'Altitude Profile',
                   xaxis: {
-                    type: 'date'
+                    type: 'date',
+                    title: 'Time (Local)'
                   },
                   yaxis: {
                     autorange: true,
