@@ -165,6 +165,9 @@ function calculate_skewt(){
 
     skewt_data = [];
     decimation = 25;
+    if (v1_data == true){
+        decimation = 1;
+    }
 
     idx = 1;
 
@@ -188,7 +191,12 @@ function calculate_skewt(){
 
         // Extract temperature datapoint
         if (entry.hasOwnProperty('temp')){
-            _temp = entry.temp;
+            if(parseFloat(entry.temp) > -270.0){
+                _temp = parseFloat(entry.temp);
+            } else{
+                idx = idx + 1;
+                continue;
+            }
         }else{
             // No temp data. Skip to the next point
             idx = idx + 1;
@@ -197,9 +205,16 @@ function calculate_skewt(){
 
         // Try and extract RH datapoint
         if (entry.hasOwnProperty('humidity')){
-            _rh = entry.humidity;
-            // Calculate the dewpoint
-            _dewp = (243.04 * (Math.log(_rh / 100) + ((17.625 * _temp) / (243.04 + _temp))) / (17.625 - Math.log(_rh / 100) - ((17.625 * _temp) / (243.04 + _temp))));
+            if(parseFloat(entry.humidity) >= 0.0){
+                _rh = parseFloat(entry.humidity);
+                console.log(_rh);
+                console.log(_temp);
+                // Calculate the dewpoint
+                _dewp = (243.04 * (Math.log(_rh / 100) + ((17.625 * _temp) / (243.04 + _temp))) / (17.625 - Math.log(_rh / 100) - ((17.625 * _temp) / (243.04 + _temp))));
+                console.log(_dewp);
+            } else {
+                _dewp = -999.0;
+            }
         }
 
         // Calculate movement
@@ -256,7 +271,7 @@ function plot_skewt(){
             modal: true,
             resizable: false,
             height: "auto",
-            width: 700,
+            width: 800,
             position: { my: "center", at: "center top", of: window },
             title: "Skew-T Plot: " + serial_number
         });

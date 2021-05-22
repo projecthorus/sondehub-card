@@ -1,6 +1,8 @@
+<!DOCTYPE html>
 <html>
 <head>
     <title>Radiosonde Flight Path</title>
+    <meta charset="UTF-8">
     <!-- 
       Author: Mark Jessop
       Date: 2020-10-31
@@ -45,6 +47,7 @@
     var flight_data = [];
     var burst_idx = -1;
     var serial_number = "";
+    var v1_data = false;
 
     function error(){
       // Pop up an error message if there is no data available for the supplied sonde.
@@ -56,7 +59,8 @@
 
         // URL to historical data.
         var path_fields = window.location.pathname.split('/');
-        //path_fields = ['S4610774']; // Testing only
+        //path_fields = ['S4610728']; // Testing only - sondehub v2 data
+        //path_fields = ['S1130567']; // Testing - old sondehub v1 data
         var sonde_id = path_fields[path_fields.length - 1].replace(/^(DFM|M10|M20|IMET|IMET54|MRZ)-/,"");
         var sondehub_url = "https://api.v2.sondehub.org/sonde/" + sonde_id;
 
@@ -287,6 +291,11 @@
 
                 // Grab sonde type from the telemetry
                 sonde_type = data[data.length-1].type;
+                if(sonde_type == 'payload_telemetry'){
+                  // Sondehub v1 data. Get the sonde type from the comment field.
+                  sonde_type = data[data.length-1].comment.split(' ')[0];
+                  v1_data = true;
+                }
 
 
                 var plot_data = [
