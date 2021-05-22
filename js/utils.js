@@ -207,11 +207,11 @@ function calculate_skewt(){
         if (entry.hasOwnProperty('humidity')){
             if(parseFloat(entry.humidity) >= 0.0){
                 _rh = parseFloat(entry.humidity);
-                console.log(_rh);
-                console.log(_temp);
+                //console.log(_rh);
+                //console.log(_temp);
                 // Calculate the dewpoint
                 _dewp = (243.04 * (Math.log(_rh / 100) + ((17.625 * _temp) / (243.04 + _temp))) / (17.625 - Math.log(_rh / 100) - ((17.625 * _temp) / (243.04 + _temp))));
-                console.log(_dewp);
+                //console.log(_dewp);
             } else {
                 _dewp = -999.0;
             }
@@ -305,5 +305,7 @@ function plot_skewt(){
 		    alert(err);
 		}	
 
+    } else {
+        alert("Insufficient Data available, or no Temperature/Humidity data available to generate Skew-T plot.");
     }
 }
