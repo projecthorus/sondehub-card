@@ -268,6 +268,7 @@ function plot_skewt(){
 
         var _buttons = {};
         _buttons.Close = function() {
+            skewt_plotted = false;
             $( this ).dialog( "close" );
         };
 
@@ -280,7 +281,12 @@ function plot_skewt(){
             height: "auto",
             width: 800,
             position: { my: "center", at: "center top", of: window },
-            title: "Skew-T Plot: " + serial_number
+            title: "Skew-T Plot: " + serial_number,
+            close: function() {
+                // 'destroy' the dialog, so it opens again in the right position.
+                skewt_plotted = false;
+                divObj.dialog( "destroy" );
+            }
         });
         divObj.dialog('open');
 
