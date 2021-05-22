@@ -222,7 +222,7 @@ function calculate_skewt(){
         _new_pos = {'lat': entry.lat, 'lon': entry.lon, 'alt': entry.alt};
 
         _pos_info = calculate_lookangles(_old_pos, _new_pos);
-        _wdir = _pos_info['azimuth'];
+        _wdir = (_pos_info['azimuth']+180.0)%360.0;
         _wspd = _pos_info['great_circle_distance']/_time_delta;
 
         if (entry.hasOwnProperty('pressure')){
