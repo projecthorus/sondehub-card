@@ -138,18 +138,19 @@
         // Add Map control
         map.addControl(new L.Control.Layers({'OSM':osm, 'OpenTopo': osm_topo_map,'ESRI Satellite':esri_sat_map}));
 
+        L.easyButton('<img src="./images/skewt_icon.png">', function(btn, map){
+                plot_skewt();
+            }, 'Plot Skew-T', 'plotSkewTButton', {
+                position: 'topright'
+            }
+        ).addTo(map);
+
         // Now we can add the zoom control.
         new L.Control.Zoom({ position: 'topright' }).addTo(map);
         map.setView([0.0,0.0], 2);
 
         L.control.polylineMeasure({position: 'topright', showClearControl: true}).addTo(map);
 
-        L.easyButton('<img src="./images/skewt.png">', function(btn, map){
-                plot_skewt();
-            }, 'Plot Skew-T', 'plotSkewTButton', {
-                position: 'topright'
-            }
-        ).addTo(map);
 
         // Now Attempt to grab the flight path data.
         $.ajax({
