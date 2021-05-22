@@ -247,8 +247,15 @@ function calculate_skewt(){
     return skewt_data;
 }
 
+var skewt_plotted = false;
+
 
 function plot_skewt(){
+
+    // Avoid re-plotting.
+    if(skewt_plotted == true){
+        return;
+    }
 
     if (flight_data.length == 0){
         // Data not loaded yet.
@@ -277,10 +284,15 @@ function plot_skewt(){
         });
         divObj.dialog('open');
 
-        var skewt = new SkewT('#skewt-plot');
+        try {
+            skewt.clear()
+        } catch(e) {
+            skewt = new SkewT('#skewt-plot');
+        }
 
         try {
-			skewt.plot(_skewt_data);
+            skewt.plot(_skewt_data);
+            skewt_plotted = true;
 		}
 		catch(err) {
 		    console.log(err);
