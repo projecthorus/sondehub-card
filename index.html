@@ -56,7 +56,7 @@
 
         // URL to historical data.
         var path_fields = window.location.pathname.split('/');
-        path_fields = ['S4610774']; // Testing only
+        //path_fields = ['S4610774']; // Testing only
         var sonde_id = path_fields[path_fields.length - 1].replace(/^(DFM|M10|M20|IMET|IMET54|MRZ)-/,"");
         var sondehub_url = "https://api.v2.sondehub.org/sonde/" + sonde_id;
 
