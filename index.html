@@ -63,7 +63,8 @@
         var path_fields = window.location.pathname.split('/');
         //path_fields = ['S4610728']; // Testing only - sondehub v2 data
         //path_fields = ['S1130567']; // Testing - old sondehub v1 data
-        var sonde_id = path_fields[path_fields.length - 1].replace(/^(DFM|M10|M20|IMET|IMET54|MRZ)-/,"");
+        //path_fields = ['8173929']; // Testing - sonde with no temp/humidity data.
+        var sonde_id = path_fields[path_fields.length - 1].replace(/^(DFM|M10|M20|IMET|IMET54|MRZ|LMS6)-/,"");
         var sondehub_url = "https://api.v2.sondehub.org/sonde/" + sonde_id;
 
 
