@@ -64,8 +64,10 @@
         //path_fields = ['S4610728']; // Testing only - sondehub v2 data
         //path_fields = ['S1130567']; // Testing - old sondehub v1 data
         //path_fields = ['8173929']; // Testing - sonde with no temp/humidity data.
+        //path_fields = ['T1320957']; // Testing - A sonde that has been recovered
         var sonde_id = path_fields[path_fields.length - 1].replace(/^(DFM|M10|M20|IMET|IMET54|MRZ|LMS6)-/,"");
         var sondehub_url = "https://api.v2.sondehub.org/sonde/" + sonde_id;
+        var recovery_url = "https://api.v2.sondehub.org/recovered?serial=" + sonde_id;
 
 
         // Rest of the code...
@@ -77,7 +79,7 @@
         // TODO: Better background.
         L.control.custom({
                 position: 'topleft',
-                content : "<div class='flight_header'><h1>Loading data, please wait...</h1></div>",
+                content : "<div class='flight_header'><h1>Loading data for " + sonde_id +", please wait...</h1></div>",
                 id: 'flight_header',
                 style   :
                 {
@@ -102,19 +104,6 @@
             })
         .addTo(map);
 
-        // Altitude Profile
-        L.control.custom({
-                position: 'bottomright',
-                content : "<div class='alt_profile'></div>",
-                id: 'alt_profile',
-                style   :
-                {
-                    margin: '5px',
-                    padding: '0px 0 0 0',
-                    cursor: 'pointer',
-                }
-            })
-        .addTo(map);
 
         // Tile Layers
 
@@ -302,6 +291,20 @@
                 }
 
 
+                // Add Altitude Profile to map
+                L.control.custom({
+                        position: 'bottomright',
+                        content : "<div class='altitudebox ui-corner-all'><div id='alt_profile'></div></div>",
+                        id: 'alt_profile_container',
+                        style   :
+                        {
+                            margin: '5px',
+                            padding: '0px 0 0 0',
+                            cursor: 'pointer',
+                        }
+                    })
+                .addTo(map);
+
                 var plot_data = [
                   {
                     x: time_data,
@@ -335,10 +338,50 @@
 
                 // Update the header.
                 $("#flight_header").html("<h1>SondeHub Historical Data <small>Serial: " + sonde_id + ", Type: " + sonde_type + "</small></h1>");
-
                 serial_number = sonde_type + " " + sonde_id + " " + launch_time;
-              }
 
+                // Now Attempt to grab the recovery details.
+                $.ajax({
+                    url: recovery_url,
+                    dataType: 'json',
+                    async: true,
+                    success: function(data){
+                        // We have obtained something from the server.
+                        if (data.length==1){
+                          // There is a record for this sonde!
+
+                          _recovery_data = data[0];
+
+                          if (_recovery_data.recovered){
+                            _recovery_info = "<b>" + _recovery_data.serial + " was recovered by " + _recovery_data.recovered_by + " at " + _recovery_data.datetime + ".</b>";
+                          } else {
+                            _recovery_info = "<b>" + _recovery_data.recovered_by + " was not able to recover " + _recovery_data.serial + " at " + _recovery_data.datetime + ".</b>";
+                          }
+                          
+                          // Add in custom recovery info if provided.
+                          if (_recovery_data.description.length > 0){
+                            _recovery_info += "</br> <b>Notes:</b> " + $('<div>').text(_recovery_data.description).html();
+                          }
+
+                          // Add Recovery Information box
+                          L.control.custom({
+                            position: 'bottomright',
+                            content : "<div class='box ui-corner-all'>" + _recovery_info + "</div>",
+                            id: 'recovery_info',
+                            style   :
+                            {
+                                margin: '5px',
+                                padding: '0px 0 0 0',
+                                cursor: 'pointer',
+                            }
+                          }).addTo(map);
+
+                        }
+                    }
+                });
+
+
+              }
         });
       }
     </script>
@@ -351,5 +394,7 @@
 </div>
 
 <div id="map"></div>
+
+
 </body>            
 </html>
