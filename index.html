@@ -108,13 +108,13 @@
         // Tile Layers
 
         // Regular OSM (Default)
-        var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        var osm = L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
         // Satellite View
         var esri_sat_map = L.tileLayer(
-            'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 
+            'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 
             {
                 maxZoom: 18,
             }
